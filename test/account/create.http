@@ -1,0 +1,7 @@
+POST http://localhost:8001/account HTTP/1.1
+content-type: application/json
+
+{
+    "email": "fahmi@gmail.com",
+    "password": "wap123"
+}
