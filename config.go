@@ -10,8 +10,19 @@ func DbConnString() string {
 	return conStr
 }
 
+func CookieHashString() (string, string) {
+	hk := os.Getenv("HASH_COOKIE_KEY")
+	bk := os.Getenv("BLOCK_COOKIE_KEY")
+	return hk, bk
+}
+
 func AddrString() string {
 	conStr := os.Getenv("SERVER_ADDR")
+	return conStr
+}
+
+func SymmetricKeyString() string {
+	conStr := os.Getenv("SYMMETRIC_KEY")
 	return conStr
 }
 

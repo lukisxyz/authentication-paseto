@@ -1,7 +1,7 @@
 package account
 
 import (
-	"flukis/ecommerce/src/utils/helper"
+	"flukis/login-system/src/utils/helper"
 	"time"
 
 	"github.com/oklog/ulid/v2"

@@ -2,6 +2,6 @@ POST http://localhost:8001/login HTTP/1.1
 content-type: application/json
 
 {
-    "email": "fsahmi#sgmail.com",
-    "password": "wap1234"
+    "email": "madang@chapsmail.com",
+    "password": "wap123"
 }

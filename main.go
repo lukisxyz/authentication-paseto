@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
-	"flukis/ecommerce/src/account"
+	"flukis/login-system/src/account"
+	"flukis/login-system/src/utils/cookie"
+	"flukis/login-system/src/utils/token"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -17,7 +19,9 @@ func main() {
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to load file .env")
 	}
+	sKey := SymmetricKeyString()
 	dbString := DbConnString()
+	cookieHash, cookieBlock := CookieHashString()
 	ctx := context.Background()
 	pool, err := pgxpool.New(ctx, dbString)
 	if err != nil {
@@ -29,6 +33,8 @@ func main() {
 	}
 	account.SetPool(pool)
 	account.SetHashParam(m, i, sl, kl, p)
+	token.SetSymetricKey(sKey)
+	cookie.SetCookieKey(cookieHash, cookieBlock)
 
 	r := chi.NewRouter()
 	r.Use(middleware.RealIP)

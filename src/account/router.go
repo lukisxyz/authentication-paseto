@@ -2,26 +2,37 @@ package account
 
 import (
 	"encoding/json"
-	"flukis/ecommerce/src/utils/response"
+	"flukis/login-system/src/utils/cookie"
+	custommiddleware "flukis/login-system/src/utils/custom-middleware"
+	"flukis/login-system/src/utils/response"
 	"net/http"
 	"net/mail"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/oklog/ulid/v2"
 )
 
 func Router() *chi.Mux {
 	r := chi.NewMux()
 
 	r.Post("/", createAccountHandler)
+	r.Group(func(rt chi.Router) {
+		rt.Use(custommiddleware.PasetoMiddleware)
+		rt.Post("/change-password", reqUpdatePassword)
+	})
 
 	return r
 }
 
-func RouterAuth() *chi.Mux {
-	r := chi.NewMux()
-	r.Post("/", loginAccountHandler)
-
-	return r
+func reqUpdatePassword(w http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
+	id := ctx.Value("user").(ulid.ULID)
+	err := requestUpdatePassword(ctx, id)
+	if err != nil {
+		response.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	response.Response(w, "please check your email", http.StatusOK, nil, nil)
 }
 
 func createAccountHandler(w http.ResponseWriter, req *http.Request) {
@@ -50,6 +61,13 @@ func createAccountHandler(w http.ResponseWriter, req *http.Request) {
 	response.Response(w, "success create an account, please check your email for verification", http.StatusCreated, nil, nil)
 }
 
+func RouterAuth() *chi.Mux {
+	r := chi.NewMux()
+	r.Post("/", loginAccountHandler)
+
+	return r
+}
+
 func loginAccountHandler(w http.ResponseWriter, req *http.Request) {
 	var input struct {
 		Email    string `json:"email"`
@@ -68,7 +86,7 @@ func loginAccountHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	ctx := req.Context()
-	account, err := loginAccount(ctx, input.Email, input.Password)
+	token, err := loginAccount(ctx, input.Email, input.Password)
 	if err != nil {
 		if err == ErrAccountNotFound {
 			response.Error(w, http.StatusNotFound, err)
@@ -77,5 +95,8 @@ func loginAccountHandler(w http.ResponseWriter, req *http.Request) {
 		response.Error(w, http.StatusBadRequest, err)
 		return
 	}
-	response.Response(w, "success login", http.StatusOK, account, nil)
+
+	cookie.SetCookie(w, token)
+
+	response.Response(w, "success login", http.StatusOK, nil, nil)
 }

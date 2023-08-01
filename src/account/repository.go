@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog/log"
 )
 
@@ -41,6 +42,38 @@ func getByEmail(ctx context.Context, email string) (Account, error) {
 		ctx,
 		query,
 		&email,
+	)
+	account := Account{}
+	if err := row.Scan(
+		&account.Id,
+		&account.Email,
+		&account.Password,
+		&account.VerificationCode,
+		&account.VerifiedAt,
+		&account.CreatedAt,
+		&account.UpdatedAt,
+	); err != nil {
+		if err == pgx.ErrNoRows {
+			log.Debug().Err(err).Msg("can't find any account")
+			return Account{}, err
+		}
+		return Account{}, err
+	}
+	return account, nil
+}
+
+func getById(ctx context.Context, id ulid.ULID) (Account, error) {
+	query := `
+		SELECT
+			id, email, password, verification_code, verified_at, created_at, updated_at
+		FROM
+			accounts
+		WHERE id = $1
+	`
+	row := pool.QueryRow(
+		ctx,
+		query,
+		&id,
 	)
 	account := Account{}
 	if err := row.Scan(
