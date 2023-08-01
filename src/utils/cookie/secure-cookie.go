@@ -1,7 +1,9 @@
 package cookie
 
 import (
+	"flukis/login-system/src/utils/token"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/securecookie"
 )
@@ -21,9 +23,9 @@ type CookieValue struct {
 	Token string `json:"token"`
 }
 
-func SetCookie(w http.ResponseWriter, token string) {
+func SetCookie(w http.ResponseWriter, pasetoToken string) {
 	var c = CookieValue{
-		Token: token,
+		Token: pasetoToken,
 	}
 	if encoded, err := s.Encode(PasetoCookie, c); err == nil {
 		cookie := &http.Cookie{
@@ -32,6 +34,7 @@ func SetCookie(w http.ResponseWriter, token string) {
 			Path:     "/",
 			Secure:   true,
 			HttpOnly: true,
+			Expires:  time.Now().Add(token.EndDuration),
 		}
 		http.SetCookie(w, cookie)
 	}

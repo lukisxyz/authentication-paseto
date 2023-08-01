@@ -13,6 +13,7 @@ var (
 	symetricKey     = []byte{}
 	ErrInvalidToken = errors.New("token is invalid")
 	ErrExpiredToken = errors.New("token has expired")
+	EndDuration     = time.Minute * 5
 )
 
 type Payload struct {
@@ -23,12 +24,11 @@ type Payload struct {
 }
 
 func New(id ulid.ULID, email string) Payload {
-	duration := time.Hour * 24 * 365
 	payload := Payload{
 		Id:        id,
 		Email:     email,
 		IssuedAt:  time.Now(),
-		ExpiredAt: time.Now().Add(duration),
+		ExpiredAt: time.Now().Add(EndDuration),
 	}
 	return payload
 }

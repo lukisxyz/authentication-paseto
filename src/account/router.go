@@ -26,7 +26,7 @@ func Router() *chi.Mux {
 
 func reqUpdatePassword(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
-	id := ctx.Value("user").(ulid.ULID)
+	id := ctx.Value(custommiddleware.ContextKeyUserId).(ulid.ULID)
 	err := requestUpdatePassword(ctx, id)
 	if err != nil {
 		response.Error(w, http.StatusInternalServerError, err)
